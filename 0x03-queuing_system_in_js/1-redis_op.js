@@ -1,22 +1,22 @@
 #!/usr/bin/yarn dev
 import { createClient, print } from 'redis';
 
-const client = createClient();
+var clientObj = createClient();
 
-client.on('error', (err) => {
+clientObj.on('error', (err) => {
   console.log('Redis client not connected to the server:', err.toString());
 });
 
-client.on('connect', () => {
+clientObj.on('connect', () => {
   console.log('Redis client connected to the server');
 });
 
-const setNewSchool = (schoolName, value) => {
-  client.SET(schoolName, value, print);
+var setNewSchool = (schoolName, value) => {
+  clientObj.SET(schoolName, value, print);
 };
 
-const displaySchoolValue = (schoolName) => {
-  client.GET(schoolName, (_err, reply) => {
+var displaySchoolValue = (schoolName) => {
+  clientObj.GET(schoolName, (_err, reply) => {
     console.log(reply);
   });
 };

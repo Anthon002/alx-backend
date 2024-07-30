@@ -1,5 +1,5 @@
 #!/usr/bin/yarn dev
-import { createclientObj } from 'redis';
+import { createClient } from 'redis';
 
 var clientObj = createclientObj();
 

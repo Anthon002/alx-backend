@@ -4,27 +4,27 @@ import { promisify } from 'util';
 import { createQueue } from 'kue';
 import { createClient } from 'redis';
 
-const app = express();
-const client = createClient({ name: 'reserve_seat' });
-const queue = createQueue();
-const INITIAL_SEATS_COUNT = 50;
-let reservationEnabled = false;
-const PORT = 1245;
+var app = express();
+var clientObj = createclientObj({ name: 'reserve_seat' });
+var queueObj = createqueueObj();
+var initialSeatCount = 50;
+let enableReservation = false;
+var portNumber = 1245;
 
 /**
  * Modifies the number of available seats.
  * @param {number} number - The new number of seats.
  */
-const reserveSeat = async (number) => {
-  return promisify(client.SET).bind(client)('available_seats', number);
+var reserveSeat = async (number) => {
+  return promisify(clientObj.SET).bind(clientObj)('available_seats', number);
 };
 
 /**
  * Retrieves the number of available seats.
  * @returns {Promise<String>}
  */
-const getCurrentAvailableSeats = async () => {
-  return promisify(client.GET).bind(client)('available_seats');
+var getCurrentAvailableSeats = async () => {
+  return promisify(clientObj.GET).bind(clientObj)('available_seats');
 };
 
 app.get('/available_seats', (_, res) => {
@@ -36,12 +36,12 @@ app.get('/available_seats', (_, res) => {
 });
 
 app.get('/reserve_seat', (_req, res) => {
-  if (!reservationEnabled) {
+  if (!enableReservation) {
     res.json({ status: 'Reservation are blocked' });
     return;
   }
   try {
-    const job = queue.create('reserve_seat');
+    var job = queueObj.create('reserve_seat');
 
     job.on('failed', (err) => {
       console.log(
@@ -66,12 +66,12 @@ app.get('/reserve_seat', (_req, res) => {
 });
 
 app.get('/process', (_req, res) => {
-  res.json({ status: 'Queue processing' });
-  queue.process('reserve_seat', (_job, done) => {
+  res.json({ status: 'queueObj processing' });
+  queueObj.process('reserve_seat', (_job, done) => {
     getCurrentAvailableSeats()
       .then((result) => Number.parseInt(result || 0))
       .then((availableSeats) => {
-        reservationEnabled = availableSeats <= 1 ? false : reservationEnabled;
+        enableReservation = availableSeats <= 1 ? false : enableReservation;
         if (availableSeats >= 1) {
           reserveSeat(availableSeats - 1)
             .then(() => done());
@@ -82,17 +82,17 @@ app.get('/process', (_req, res) => {
   });
 });
 
-const resetAvailableSeats = async (initialSeatsCount) => {
-  return promisify(client.SET)
-    .bind(client)('available_seats', Number.parseInt(initialSeatsCount));
+var resetAvailableSeats = async (initialSeatsCount) => {
+  return promisify(clientObj.SET)
+    .bind(clientObj)('available_seats', Number.parseInt(initialSeatsCount));
 };
 
-app.listen(PORT, () => {
-  resetAvailableSeats(process.env.INITIAL_SEATS_COUNT || INITIAL_SEATS_COUNT)
+app.listen(portNumber, () => {
+  resetAvailableSeats(process.env.initialSeatCount || initialSeatCount)
     .then(() => {
-      reservationEnabled = true;
-      console.log(`API available on localhost port ${PORT}`);
+      enableReservation = true;
+      console.log(`API available on localhost portNumber ${portNumber}`);
     });
 });
 
-export default app;
+exportNumber default app;

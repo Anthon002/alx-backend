@@ -3,7 +3,7 @@ import express from 'express';
 import { promisify } from 'util';
 import { createClient } from 'redis';
 
-const listProducts = [
+var productList = [
   {
     itemId: 1,
     itemName: 'Suitcase 250',
@@ -30,24 +30,24 @@ const listProducts = [
   },
 ];
 
-const getItemById = (id) => {
-  const item = listProducts.find(obj => obj.itemId === id);
+var getItemById = (id) => {
+  var item = productList.find(obj => obj.itemId === id);
 
   if (item) {
     return Object.fromEntries(Object.entries(item));
   }
 };
 
-const app = express();
-const client = createClient();
-const PORT = 1245;
+var app = express();
+var client = createClient();
+var PORT = 1245;
 
 /**
  * Modifies the reserved stock for a given item.
  * @param {number} itemId - The id of the item.
  * @param {number} stock - The stock of the item.
  */
-const reserveStockById = async (itemId, stock) => {
+var reserveStockById = async (itemId, stock) => {
   return promisify(client.SET).bind(client)(`item.${itemId}`, stock);
 };
 
@@ -56,17 +56,17 @@ const reserveStockById = async (itemId, stock) => {
  * @param {number} itemId - The id of the item.
  * @returns {Promise<String>}
  */
-const getCurrentReservedStockById = async (itemId) => {
+var getCurrentReservedStockById = async (itemId) => {
   return promisify(client.GET).bind(client)(`item.${itemId}`);
 };
 
 app.get('/list_products', (_, res) => {
-  res.json(listProducts);
+  res.json(productList);
 });
 
 app.get('/list_products/:itemId(\\d+)', (req, res) => {
-  const itemId = Number.parseInt(req.params.itemId);
-  const productItem = getItemById(Number.parseInt(itemId));
+  var itemId = Number.parseInt(req.params.itemId);
+  var productItem = getItemById(Number.parseInt(itemId));
 
   if (!productItem) {
     res.json({ status: 'Product not found' });
@@ -81,8 +81,8 @@ app.get('/list_products/:itemId(\\d+)', (req, res) => {
 });
 
 app.get('/reserve_product/:itemId', (req, res) => {
-  const itemId = Number.parseInt(req.params.itemId);
-  const productItem = getItemById(Number.parseInt(itemId));
+  var itemId = Number.parseInt(req.params.itemId);
+  var productItem = getItemById(Number.parseInt(itemId));
 
   if (!productItem) {
     res.json({ status: 'Product not found' });
@@ -102,9 +102,9 @@ app.get('/reserve_product/:itemId', (req, res) => {
     });
 });
 
-const resetProductsStock = () => {
+var resetProductsStock = () => {
   return Promise.all(
-    listProducts.map(
+    productList.map(
       item => promisify(client.SET).bind(client)(`item.${item.itemId}`, 0),
     )
   );

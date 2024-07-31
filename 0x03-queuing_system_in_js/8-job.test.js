@@ -5,8 +5,8 @@ import { createQueue } from 'kue';
 import createPushNotificationsJobs from './8-job.js';
 
 describe('createPushNotificationsJobs', () => {
-  const _spy = sinon.spy(console);
-  const queueObj = createQueue({ name: 'push_notification_code_test' });
+  var _spy = sinon.spy(console);
+  var queueObj = createQueue({ name: 'push_notification_code_test' });
 
   before(() => {
     queueObj.testMode.enter(true);
@@ -29,7 +29,7 @@ describe('createPushNotificationsJobs', () => {
 
   it('adds jobs to the queueObj with the correct type', (done) => {
     expect(queueObj.testMode.jobs.length).to.equal(0);
-    const jobInfos = [
+    var jobInfos = [
       {
         phoneNumber: '44556677889',
         message: 'Use the code 1982 to verify your account',

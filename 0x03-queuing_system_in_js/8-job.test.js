@@ -5,30 +5,30 @@ import { createQueue } from 'kue';
 import createPushNotificationsJobs from './8-job.js';
 
 describe('createPushNotificationsJobs', () => {
-  const BIG_BROTHER = sinon.spy(console);
-  const QUEUE = createQueue({ name: 'push_notification_code_test' });
+  const _spy = sinon.spy(console);
+  const queueObj = createQueue({ name: 'push_notification_code_test' });
 
   before(() => {
-    QUEUE.testMode.enter(true);
+    queueObj.testMode.enter(true);
   });
 
   after(() => {
-    QUEUE.testMode.clear();
-    QUEUE.testMode.exit();
+    queueObj.testMode.clear();
+    queueObj.testMode.exit();
   });
 
   afterEach(() => {
-    BIG_BROTHER.log.resetHistory();
+    _spy.log.resetHistory();
   });
 
   it('displays an error message if jobs is not an array', () => {
     expect(
-      createPushNotificationsJobs.bind(createPushNotificationsJobs, {}, QUEUE)
+      createPushNotificationsJobs.bind(createPushNotificationsJobs, {}, queueObj)
     ).to.throw('Jobs is not an array');
   });
 
-  it('adds jobs to the queue with the correct type', (done) => {
-    expect(QUEUE.testMode.jobs.length).to.equal(0);
+  it('adds jobs to the queueObj with the correct type', (done) => {
+    expect(queueObj.testMode.jobs.length).to.equal(0);
     const jobInfos = [
       {
         phoneNumber: '44556677889',
@@ -39,49 +39,49 @@ describe('createPushNotificationsJobs', () => {
         message: 'Use the code 1738 to verify your account',
       },
     ];
-    createPushNotificationsJobs(jobInfos, QUEUE);
-    expect(QUEUE.testMode.jobs.length).to.equal(2);
-    expect(QUEUE.testMode.jobs[0].data).to.deep.equal(jobInfos[0]);
-    expect(QUEUE.testMode.jobs[0].type).to.equal('push_notification_code_3');
-    QUEUE.process('push_notification_code_3', () => {
+    createPushNotificationsJobs(jobInfos, queueObj);
+    expect(queueObj.testMode.jobs.length).to.equal(2);
+    expect(queueObj.testMode.jobs[0].data).to.deep.equal(jobInfos[0]);
+    expect(queueObj.testMode.jobs[0].type).to.equal('push_notification_code_3');
+    queueObj.process('push_notification_code_3', () => {
       expect(
-        BIG_BROTHER.log
-          .calledWith('Notification job created:', QUEUE.testMode.jobs[0].id)
+        _spy.log
+          .calledWith('Notification job created:', queueObj.testMode.jobs[0].id)
       ).to.be.true;
       done();
     });
   });
 
   it('registers the progress event handler for a job', (done) => {
-    QUEUE.testMode.jobs[0].addListener('progress', () => {
+    queueObj.testMode.jobs[0].addListener('progress', () => {
       expect(
-        BIG_BROTHER.log
-          .calledWith('Notification job', QUEUE.testMode.jobs[0].id, '25% complete')
+        _spy.log
+          .calledWith('Notification job', queueObj.testMode.jobs[0].id, '25% complete')
       ).to.be.true;
       done();
     });
-    QUEUE.testMode.jobs[0].emit('progress', 25);
+    queueObj.testMode.jobs[0].emit('progress', 25);
   });
 
   it('registers the failed event handler for a job', (done) => {
-    QUEUE.testMode.jobs[0].addListener('failed', () => {
+    queueObj.testMode.jobs[0].addListener('failed', () => {
       expect(
-        BIG_BROTHER.log
-          .calledWith('Notification job', QUEUE.testMode.jobs[0].id, 'failed:', 'Failed to send')
+        _spy.log
+          .calledWith('Notification job', queueObj.testMode.jobs[0].id, 'failed:', 'Failed to send')
       ).to.be.true;
       done();
     });
-    QUEUE.testMode.jobs[0].emit('failed', new Error('Failed to send'));
+    queueObj.testMode.jobs[0].emit('failed', new Error('Failed to send'));
   });
 
   it('registers the complete event handler for a job', (done) => {
-    QUEUE.testMode.jobs[0].addListener('complete', () => {
+    queueObj.testMode.jobs[0].addListener('complete', () => {
       expect(
-        BIG_BROTHER.log
-          .calledWith('Notification job', QUEUE.testMode.jobs[0].id, 'completed')
+        _spy.log
+          .calledWith('Notification job', queueObj.testMode.jobs[0].id, 'completed')
       ).to.be.true;
       done();
     });
-    QUEUE.testMode.jobs[0].emit('complete');
+    queueObj.testMode.jobs[0].emit('complete');
   });
 });

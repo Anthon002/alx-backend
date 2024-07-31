@@ -1,28 +1,21 @@
 #!/usr/bin/yarn dev
 import { createQueue, Job } from 'kue';
 
-const BLACKLISTED_NUMBERS = ['4153518780', '4153518781'];
-const queue = createQueue();
+var blackListedNumbers = ['4153518780', '4153518781'];
+var queueObj = createQueue();
 
-/**
- * Sends a push notification to a user.
- * @param {String} phoneNumber
- * @param {String} message
- * @param {Job} job
- * @param {*} done
- */
-const sendNotification = (phoneNumber, message, job, done) => {
-  let total = 2, pending = 2;
+function sendNotification(phoneNumber, message, job, done){
+  let agregate = 2, pending = 2;
   let sendInterval = setInterval(() => {
-    if (total - pending <= total / 2) {
-      job.progress(total - pending, total);
+    if (agregate - pending <= agregate / 2) {
+      job.progress(agregate - pending, agregate);
     }
-    if (BLACKLISTED_NUMBERS.includes(phoneNumber)) {
+    if (blackListedNumbers.includes(phoneNumber)) {
       done(new Error(`Phone number ${phoneNumber} is blacklisted`));
       clearInterval(sendInterval);
       return;
     }
-    if (total === pending) {
+    if (agregate === pending) {
       console.log(
         `Sending notification to ${phoneNumber},`,
         `with message: ${message}`,
@@ -33,6 +26,6 @@ const sendNotification = (phoneNumber, message, job, done) => {
   }, 1000);
 };
 
-queue.process('push_notification_code_2', 2, (job, done) => {
+queueObj.process('push_notification_code_2', 2, (job, done) => {
   sendNotification(job.data.phoneNumber, job.data.message, job, done);
 });

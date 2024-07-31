@@ -1,9 +1,8 @@
 #!/usr/bin/yarn dev
 import { createQueue } from 'kue';
 
-const queue = createQueue();
-
-const sendNotification = (phoneNumber, message) => {
+var queue = createQueue();
+function sendNotification(phoneNumber, message){
   console.log(
     `Sending notification to ${phoneNumber},`,
     'with message:',

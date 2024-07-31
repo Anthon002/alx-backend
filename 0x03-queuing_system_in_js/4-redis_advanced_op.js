@@ -1,22 +1,22 @@
 #!/usr/bin/yarn dev
 import { createClient, print } from 'redis';
 
-const client = createClient();
+var clientObj = createClient();
 
-client.on('error', (err) => {
+clientObj.on('error', (err) => {
   console.log('Redis client not connected to the server:', err.toString());
 });
 
-const updateHash = (hashName, fieldName, fieldValue) => {
-  client.HSET(hashName, fieldName, fieldValue, print);
+function updateHash(hashName, fieldName, fieldValue){
+  clientObj.HSET(hashName, fieldName, fieldValue, print);
 };
 
-const printHash = (hashName) => {
-  client.HGETALL(hashName, (_err, reply) => console.log(reply));
+function printHash(hashName){
+  clientObj.HGETALL(hashName, (_err, reply) => console.log(reply));
 };
 
 function main() {
-  const hashObj = {
+  var hashObj = {
     Portland: 50,
     Seattle: 80,
     'New York': 20,
@@ -24,13 +24,13 @@ function main() {
     Cali: 40,
     Paris: 2,
   };
-  for (const [field, value] of Object.entries(hashObj)) {
+  for (var [field, value] of Object.entries(hashObj)) {
     updateHash('HolbertonSchools', field, value);
   }
   printHash('HolbertonSchools');
 }
 
-client.on('connect', () => {
+clientObj.on('connect', () => {
   console.log('Redis client connected to the server');
   main();
 });

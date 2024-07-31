@@ -1,7 +1,7 @@
 #!/usr/bin/yarn dev
 import { createQueue } from 'kue';
 
-const jobs = [
+var jobs = [
   {
     phoneNumber: '4153518780',
     message: 'This is the code 1234 to verify your account',
@@ -48,8 +48,7 @@ const jobs = [
   },
 ];
 
-const queue = createQueue({ name: 'push_notification_code_2' });
-
+var queue = createQueue({ name: 'push_notification_code_2' });
 for (const jobInfo of jobs) {
   const job = queue.create('push_notification_code_2', jobInfo);
 
